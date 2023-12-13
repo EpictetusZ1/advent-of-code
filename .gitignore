@@ -1,0 +1,14 @@
+# local env files
+.env
+.env*.local
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# environment
+.idea/
+.vscode/
