@@ -1,34 +1,12 @@
-const testInput =
-    "467..114..\n" +
-    "...*......\n" +
-    "..35..633.\n" +
-    "......#...\n" +
-    "617*......\n" +
-    ".....+.58.\n" +
-    "..592.....\n" +
-    "......755.\n" +
-    "...$.*....\n" +
-    ".664.598.."
+import { loadFile } from "../../utils";
 
 
 const main = async () => {
-    const splitLines = (input: string) => {
-        return input.split("\n")
-    }
-
-    // Find any number adjacent to a symbol
-    // Need to keep track of:
-    // - 2 positions on outside + length of number above number
-    // - position to left and right
-    //- 2 positions on outside + length of number below number
-
-    // Find the index of the number
-
-    const getArrayFromLines = (line: string) => {
-        return line.split("")
-    }
-    const lines = splitLines(testInput)
-
+    const loadInput = await loadFile()
+    const splitLines = (input: string) => input.split("\n")
+    const lines = splitLines(loadInput)
+    const getArrayFromLines = (line: string) => line.split("")
+    const isSymbol = (char: any) => [',', '*', '+', '#', '$', '!', '@', '&', '%', '^', '(', ')', '-', '=', '{', '}', '[', ']', '|', ':', ';', '<', '>', '/', '?', '~', '`'].includes(char)
     const getNumbersFromArray = (line: string[]) => {
         let currNum = []
         let numPositions = []
@@ -58,32 +36,44 @@ const main = async () => {
         return { numbers, positions }
     }
 
-
-    const validNums: number[] = []
-
-    const checkSurround = (num: number, numIndex: number[], lineIndex: number) => {
-
+    const checkSurround = (numIndex: number[], lineIndex: number) => {
+        for (let position of numIndex) {
+            for (let dx = -1; dx <= 1; dx++) {
+                for (let dy = -1; dy <= 1; dy++) {
+                    if (dx === 0 && dy === 0) continue
+                    const checkX = position + dx
+                    const checkY = lineIndex + dy
+                    if (checkY >= 0 && checkY < lines.length && checkX >= 0 && checkX < lines[checkY].length) {
+                        if (isSymbol(lines[checkY][checkX])) {
+                            return true
+                        }
+                    }
+                }
+            }
+        }
+        return false
     }
+
+    let validNums: number[] = []
 
     for (let i = 0; i < lines.length; i++) {
-        const dataArr = getArrayFromLines(lines[i])
-        console.log(dataArr)
-        const data = getNumbersFromArray(dataArr)
-        console.log("data", data)
-        if (data) {
-            const nums: number[] = data.numbers
-            const indices = data.positions
-            console.log("nums: ", nums)
-            console.log("indicies: ", indices)
-            nums.forEach((myNum, index) => {
-                checkSurround(myNum, indices, i)
-            })
-        }
+        const lineArray = getArrayFromLines(lines[i])
+        const data = getNumbersFromArray(lineArray)
+        const nums = data.numbers
+        const indices = data.positions
+
+        nums.forEach((num, index) => {
+            if (checkSurround(indices[index], i)) {
+                validNums.push(num)
+            }
+        })
     }
+
+    return validNums.reduce((acc, val) => acc + val, 0)
 }
 
 try {
-    main()
+   main().then((data) => console.log(data))
 } catch (err) {
     console.log("error", err)
 }
